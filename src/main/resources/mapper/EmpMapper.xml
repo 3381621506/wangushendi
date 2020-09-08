@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.cskj.ssm.mapper.EmpMapper">
+	<resultMap type="emp" id="baseEmpMap">
+		<id column="id" property="id"/>
+		<result column="username" property="username"/>
+		<result column="password" property="password"/>
+		<result column="sex" property="sex"/>
+		<result column="age" property="age"/>
+		<result column="birthday" property="birthday"/>
+		<result column="address" property="address"/>
+		<association property="dept" javaType="dept">
+			<id column="did" property="did"/>
+			<result column="dname" property="dname"/>
+		</association>
+	</resultMap>
+	<select id="queryEmpAll" resultMap="baseEmpMap">
+		select * from emp e join dept d on e.did=d.did 
+		<where>
+			<if test="mohu != null">
+				 and username like concat('%',#{mohu},'%')
+			</if>
+			<if test="did != 0 and did != null ">
+				and d.did = #{did} 
+			</if>
+		</where>
+		
+		 limit #{page.startRecord},#{page.pageSize}
+	</select>
+	<select id="getCount" resultType="int">
+		select count(*) from emp join dept on emp.did=dept.did where username like concat('%',#{mohu},'%') 
+	
+	</select>
+</mapper>

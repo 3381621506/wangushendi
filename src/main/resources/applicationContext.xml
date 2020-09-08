@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+                    http://www.springframework.org/schema/context
+                    http://www.springframework.org/schema/context/spring-context.xsd
+                    http://www.springframework.org/schema/beans
+                    http://www.springframework.org/schema/beans/spring-beans.xsd
+                    http://www.springframework.org/schema/tx
+                    http://www.springframework.org/schema/tx/spring-tx.xsd
+                    http://www.springframework.org/schema/aop
+                    http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <!-- 读取properties文件 -->
+    <context:property-placeholder location="classpath:jdbc.properties" system-properties-mode="NEVER"/>
+	<!-- 配置数据库连接池 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" >
+		<property name="username" value="${username}"/>
+		<property name="password" value="${password}"/>
+		<property name="driverClassName" value="${driver}"/>
+		<property name="url" value="${url}"/>
+		
+		<!-- 最大并发数 -->
+		<property name="maxActive" value="10" />
+		<!-- 初始化连接的数量 -->
+		<property name="initialSize" value="5" />
+		<!-- 最小空闲连接数 -->
+		<property name="minIdle" value="1" />
+		<!-- 超时等待时间 毫秒 -->
+		<property name="maxWait" value="30000" />
+	</bean>
+
+	<!-- 配置mybatis的SessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 注入 数据源 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 指定mybatis的主要配置文件位置 -->
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+		<!-- 指定 xml文件位置 -->
+		<property name="mapperLocations" value="classpath:mapper/*.xml" />
+	</bean>
+
+	<!-- 配置扫描器 将mapper接口的实现加入到spring容器中 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="org.cskj.ssm.mapper" />
+	</bean>
+
+	<!-- 配置session生成方式 -->
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"></constructor-arg>
+	</bean>
+
+	<!-- 事务管理 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<!-- 开启注解式事务管理 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+</beans>
